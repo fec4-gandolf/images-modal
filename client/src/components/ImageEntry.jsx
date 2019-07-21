@@ -5,8 +5,8 @@ const MainEntryContainer = styled.div`
 `;
 
 const MainEntry = styled.img`
-  width: 41px;
   height: 41px;
+  width: 41px;
   margin-bottom: 5px;
   border: 1px solid #ccc;
   &:hover {
