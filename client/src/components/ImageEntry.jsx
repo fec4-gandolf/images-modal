@@ -1,25 +1,24 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const MainEntry = styled.img`
-height:41px;
-width:41px;
-margin-right:17px;
-margin-bottom:5px;
-border: 1px solid #ccc;
-&:hover {
-  border: 1px solid #0654ba;
-}
+const MainEntryContainer = styled.div`
 `;
 
-const MainSelected1 = styled.img`
-  height:41px;
+const MainEntry = styled.img`
   width:41px;
-  margin-right:17px;
+  height:41px;
   margin-bottom:5px;
-  border: solid 2px #0654ba;
+  border: 1px solid #ccc;
+  &:hover {
+    border: 1px solid #0654ba;
+  }
+`;
+
+const MainSelected = styled.img`
   height: 39px;
   width: 39px;
+  margin-bottom:5px;
+  border: solid 2px #0654ba;
 `;
 
 
@@ -28,27 +27,28 @@ const ImageEntry = ({
 }) => {
   if (image === state.previousImage) {
     return (
-      <div>
-        <MainSelected1
+      <MainEntryContainer>
+        <MainSelected
           src={image}
           onMouseEnter={onHover}
           onMouseLeave={onExit}
           onClick={onSelect}
         />
-      </div>
+      </MainEntryContainer>
     );
   }
-
-  return (
-    <div>
-      <MainEntry
-        src={image}
-        onMouseEnter={onHover}
-        onMouseLeave={onExit}
-        onClick={onSelect}
-      />
-    </div>
-  );
+  else {
+    return (
+      <MainEntryContainer>
+        <MainEntry
+          src={image}
+          onMouseEnter={onHover}
+          onMouseLeave={onExit}
+          onClick={onSelect}
+        />
+      </MainEntryContainer>
+    );
+  }
 };
 
 export default ImageEntry;
