@@ -3,118 +3,122 @@ import styled, { keyframes } from 'styled-components';
 import ImageEntry from './ImageEntry.jsx';
 import GalleryImageEntry from './GalleryImageEntry.jsx';
 
-
-const slideIn = keyframes`
+const SlideIn = keyframes`
 0% {
-  height:1%;
+  height: 0%;
 }
 
 100% {
-  height:10%;
+  height: 10%;
 }
 `;
 
 const ImagesList = styled.div`
-  padding-top: 10px;
-  paddin-right:5%;
-  text-align: center;
   display: flex;
+  margin-right: 35px;
+  text-align: center;
 `;
 
 const MainImage = styled.img`
-  height: 498px;
-  width: 498px;
+  height: 500px;
+  width: 500px;
+  z-index: 5;
   border: 1px solid rgb(102, 102, 102);
+`;
 
-  z-index:5;
-  &:hover {
-    opacity:.7;
-  }
+const MainEntryWrapper = styled.div`
+  position: relative;
+  padding-right: 1px;
+  margin-right: 20px;
 `;
 
 const MagnifiedDiv = styled.figure`
-position: absolute;
-z-index:4;
-height: 700px;
-width: 550px;
-background-repeat: no-repeat;
-display:block;
-border:none;
-transform: translate(520px, -16px);
-
+  height: 750px;
+  width: 750px;
+  display: block;
+  position: absolute;
+  z-index:4;
+  background-repeat: no-repeat;
+  border:none;
+  transform: translate(526px, -16px);
 `;
 
 const Inner = styled.div`
-  left:51%;
-  top:50%;
-  -webkit-transform: translate(-50%, -50%);
-  -moz-transform: translate(-50%, -50%);
-  transform: translate(-50%, -50%);
-  position:absolute;
-  border: 1px solid black;
-  opacity:.9;
-  padding-top:20px;
   height: 130px;
   width: 150px;
+  position: absolute;
+  padding-top: 20px;
+  top: 50%;
+  left: 50%;
+  -moz-transform: translate(-50%, -50%);
+  -webkit-transform: translate(-50%, -50%);
+  transform: translate(-50%, -50%);
+  border: 1px solid black;
+  background-color:#fff;
+  opacity: .7;
   font-family: "Helvetica neue",Helvetica,Verdana,Sans-serif;
-  font-size:1.1em;
+  font-size: 1.1em;
 `;
 
 const ZoomSelector = styled.div`
-  background-color:rgba(0,0,0,.1);
-  height: 405px;
-  width: 434px;
-  position:absolute;
-  border:1px solid black;
-  display:inline-block;
-  transform: translate(-100%, -0%);
-  padding:10px;
+  height: 250px;
+  width: 250px;
+  top: 187.5px;
+  left: 187.5px;
+  position: absolute;
+  background-color: rgba(0,0,0,1);
+  border: 1px solid black;
 `;
 
 const MainImageWrapper = styled.div`
   position: relative;
-
 `;
 
-const GalleryHovered = styled.img`
-  border: solid 1px rgb(204, 204, 204);
-`;
 const GalleryEntryWrapper = styled.div`
-  z-index:3;
-  width:100%;
-  height:11%;
-  padding-top:13px;
+  width: 100%;
+  padding: 1%;
+  z-index: 3;
+  position: absolute;
+  left: 50%;
+  overflow: hidden;
   background-color: rgb(248,248,248,.95);
-  left:50%;
-
-  -webkit-transform: translate(-50%, -90%);
   -moz-transform: translate(-50%, -90%);
+  -webkit-transform: translate(-50%, -90%);
   transform: translate(-50%, -90%);
-  position:absolute;
-  justifyContent: 'center';
-  animation: ${slideIn} linear .3s;
-  overflow:hidden;
-
+  animation: ${SlideIn} linear .3s;
 `;
 
 const GalleryMainImage = styled.img`
-  width: 70vw;
+  width: 75vw;
   height: 90vh;
-
+  padding-top: 5vh;
+  padding-bottom: 5vh;
 `;
 
 const ImageListGallery = styled.div`
-  text-align: center;
-  position: fixed;
   height: 100%;
   width: 100%;
-  background-color:#000;
-  z-index:2;
-  overflow:hidden;
-  top:0;
-  left:0;
-
+  z-index: 2;
+  position: fixed;
+  overflow: hidden;
+  top: 0;
+  left: 0;
+  text-align: center;
+  background-color: #000;
 `;
+// zoom and magnification utilities
+const halfZoomHeight = 125;
+const halfZoomWidth = 125;
+const halfZoomHeightPercent = 25;
+const halfZoomWidthPercent = 25;
+const adjustedPercentXEnd = 100 - halfZoomWidthPercent;
+const adjustedPercentYEnd = 100 - halfZoomHeightPercent;
+const mainImageWidth = 500;
+const mainImageHeight = 500;
+const halfMainImageWidth = 250;
+const halfMainImageHeight = 250;
+const adjustedXEnd = mainImageWidth - halfZoomWidth;
+const adjustedYEnd = mainImageHeight - halfZoomHeight;
 
 class ImageList extends React.Component {
   constructor(props) {
@@ -125,11 +129,12 @@ class ImageList extends React.Component {
       zoom: false,
       magnifyImage: null,
       galleryState: false,
-      x: null,
-      y: null,
-      screenx: null,
-      screeny: null,
-      backgroundPosition: '0% 0%',
+      xFlat: 0,
+      yFlat: 0,
+      xPercent: '',
+      yPercent: '',
+      yRatio: null,
+      backgroundPosition: '50% 50%',
     };
     this.onHover = this.onHover.bind(this);
     this.onExit = this.onExit.bind(this);
@@ -139,11 +144,8 @@ class ImageList extends React.Component {
     this.selectImageOnLoad = this.selectImageOnLoad.bind(this);
     this.magnifyImage = this.magnifyImage.bind(this);
     this.mainClick = this.mainClick.bind(this);
-
     this.handleKeyPress = this.handleKeyPress.bind(this);
     this.onMovePointer = this.onMovePointer.bind(this);
-
-
     this.onZoom = this.onZoom.bind(this);
     this.onZoomOut = this.onZoomOut.bind(this);
   }
@@ -186,6 +188,7 @@ class ImageList extends React.Component {
   onSelect(e) {
     this.setState({
       previousImage: e.target.src,
+      magnifyImage: e.target.src,
     });
   }
 
@@ -225,39 +228,89 @@ class ImageList extends React.Component {
     });
   }
 
-  onGalleryMovePointer(e){
-    let {
-      left, top, width, height,
-    } = e.target.getBoundingClientRect();
+  onGalleryMovePointer(e) {
+    const height = window.innerHeight;
+    const YLocation = e.clientY;
+    const screenTraversed = YLocation / height;
     this.setState({
-      screenx: e.screenX,
-      screeny: e.screenY
-    })
+      yRatio: screenTraversed,
+    });
+  }
+
+  mapXFlat(xOffset) {
+    const adjustedOffsetX = xOffset - halfZoomWidth;
+    if (xOffset >= halfZoomWidth && xOffset <= adjustedXEnd) {
+      return adjustedOffsetX;
+    }
+    if (xOffset < halfZoomWidth) {
+      return 0;
+    }
+    if (xOffset > adjustedXEnd) {
+      return halfMainImageWidth;
+    }
+  }
+
+  mapYFlat(yOffset) {
+    const adjustedOffsetY = yOffset - halfZoomHeight;
+    if (yOffset >= halfZoomHeight && yOffset <= adjustedYEnd) {
+      return adjustedOffsetY;
+    }
+    if (yOffset > adjustedYEnd) {
+      return halfMainImageHeight;
+    }
+    if (yOffset < adjustedYEnd) {
+      return 0;
+    }
+  }
+
+  mapYMagnification(percentY) {
+    const adjustedPercentY = (percentY - halfZoomHeightPercent) / 0.5;
+    if (percentY >= halfZoomHeightPercent && percentY <= adjustedPercentYEnd) {
+      return adjustedPercentY;
+    }
+    if (percentY < halfZoomHeightPercent) {
+      return 0;
+    }
+    if (percentY > adjustedPercentYEnd) {
+      return 100;
+    }
+  }
+
+  mapXMagnification(percentX) {
+    const adjustedPercentX = (percentX - halfZoomWidthPercent) / 0.5;
+    if (percentX >= halfZoomWidthPercent && percentX <= adjustedPercentXEnd) {
+      return adjustedPercentX;
+    }
+    if (percentX < halfZoomWidthPercent) {
+      return 0;
+    }
+    if (percentX > adjustedPercentXEnd) {
+      return 100;
+    }
   }
 
   onMovePointer(e) {
     const rect = e.target.getBoundingClientRect();
-    const x1 = `${(e.clientX - rect.left) / 450 * 100}%`;
-    const y1 = `${(e.clientY - rect.top) / 400 * 100}%`;
-    let {
-      left, top, width, height,
-    } = e.target.getBoundingClientRect();
-    const r = (e.pageX - left) / width * 100;
-    const s = (e.pageY - top) / height * 100;
+    const xOffset = (e.clientX - rect.left);
+    const yOffset = (e.clientY - rect.top);
+    // adjust for percent / 500 * 100
+    const percentX = xOffset / 5;
+    const percentY = yOffset / 5;
     this.setState({
-      x: x1,
-      y: y1,
-      backgroundPosition: `${r}% ${s}%`
+      xFlat: this.mapXFlat(xOffset),
+      yFlat: this.mapYFlat(yOffset),
+      xPercent: `${this.mapXMagnification(percentX)}%`,
+      yPercent: `${this.mapYMagnification(percentY)}%`,
+      backgroundPosition: `${this.state.xPercent} ${this.state.yPercent}`,
     });
   }
-
 
   render() {
     // Main- magnifiy Image state
     if (this.state.galleryState === false && this.state.magnifyImage !== null && this.state.zoom === true) {
       return (
         <ImagesList>
-          <div>
+          <MainEntryWrapper>
             {this.props.images.map(image => (
               <ImageEntry
                 image={image}
@@ -267,16 +320,15 @@ class ImageList extends React.Component {
                 state={this.state}
               />
             ))}
-          </div>
+          </MainEntryWrapper>
           <MainImageWrapper
             src={this.state.selectedImage}
             onClick={this.mainClick}
             onMouseMove={this.onMovePointer}
             onMouseOut={this.onZoomOut}
           >
-            <ZoomSelector style={{ left: this.state.x, top: this.state.y, transform: `translate(-${this.state.x}, -${this.state.y}) ` }}>
-            </ZoomSelector>
-            <MainImage src={this.state.selectedImage} />
+            <ZoomSelector style={{ left: this.state.xFlat, top: this.state.yFlat }} />
+            <MainImage src={this.state.selectedImage} style={{ opacity: '.8' }} />
           </MainImageWrapper>
           <MagnifiedDiv
             style={{ backgroundImage: `url(${this.state.magnifyImage})`, backgroundPosition: this.state.backgroundPosition }}
@@ -288,9 +340,9 @@ class ImageList extends React.Component {
     if (this.state.galleryState === false && this.state.magnifyImage !== null) {
       return (
         <ImagesList>
-          <div>
+          <MainEntryWrapper>
             {this.props.images.map(image => <ImageEntry image={image} onHover={this.onHover} onExit={this.onExit} onSelect={this.onSelect} state={this.state} />)}
-          </div>
+          </MainEntryWrapper>
           <MainImageWrapper
             src={this.state.selectedImage}
             onClick={this.mainClick}
@@ -314,13 +366,11 @@ class ImageList extends React.Component {
     if (this.state.galleryState === false) {
       return (
         <ImagesList>
-
-          <div>
+          <MainEntryWrapper>
             {this.props.images.map(image => <ImageEntry image={image} onHover={this.onHover} onExit={this.onExit} onSelect={this.onSelect} state={this.state} />)}
-          </div>
+          </MainEntryWrapper>
           <MainImageWrapper>
             <MainImage
-              src={this.state.selectedImage}
               src={this.state.selectedImage}
               onMouseEnter={this.magnifyImage}
               onClick={this.mainClick}
@@ -332,10 +382,11 @@ class ImageList extends React.Component {
       );
     }
     // Gallery - with underbar
-    if (this.state.galleryState === true && this.state.screeny > 500) {
+    if (this.state.galleryState === true && this.state.yRatio > 0.5) {
       return (
         <ImageListGallery
-          onMouseMove={this.onGalleryMovePointer}>
+          onMouseMove={this.onGalleryMovePointer}
+        >
           <GalleryMainImage
             src={this.state.selectedImage}
           />
@@ -358,16 +409,16 @@ class ImageList extends React.Component {
     if (this.state.galleryState === true) {
       return (
         <ImageListGallery
-          onMouseMove={this.onGalleryMovePointer}>
-            <GalleryMainImage
-              src={this.state.selectedImage}
-            />
-  <div></div>
+          onMouseMove={this.onGalleryMovePointer}
+        >
+          <GalleryMainImage
+            src={this.state.selectedImage}
+          />
+          <div />
         </ImageListGallery>
       );
     }
   }
 }
-
 
 export default ImageList;
