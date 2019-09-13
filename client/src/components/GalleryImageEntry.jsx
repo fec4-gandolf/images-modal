@@ -3,26 +3,24 @@ import styled from 'styled-components';
 
 const GalleryContainer = styled.div`
   display: inline-block;
-  padding-bottom:20px;
-  margin: 0 auto;
+  padding-top: 4px;
+  margin: 0px 4px;
 `;
 
 const GalleryImageEntry = styled.img`
-  height:72px;
-  width:72px;
-  padding: 0px;
+  height: 72px;
+  width: 72px;
   border: solid 1px #ccc;
   border-radius:3px;
   &:hover {
-    border: solid 1px #fff;
+    border: solid 1px #000;
   }
 `;
 
 const GallerySelected = styled.img`
-  height:72px;
-  width:72px;
-  padding: 0px;
-  border: solid 1px #000;
+  height: 70px;
+  width: 70px;
+  border: solid 2px #000;
   border-radius:3px;
 `;
 
