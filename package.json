@@ -46,7 +46,7 @@
     "superagent": "^5.1.0",
     "supertest": "^4.0.2",
     "webpack": "^4.35.3",
-    "webpack-cli": "^3.3.5"
+    "webpack-cli": "^3.3.12"
   },
   "version": "1.0.0",
   "main": "server/server.js",
